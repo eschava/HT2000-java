@@ -9,7 +9,7 @@ SET temperatureTopic=/ht-2000/temperature
 SET humidityTopic=/ht-2000/humidity
 SET co2Topic=/ht-2000/co2
 
-SET interval=5
+SET interval=60
 
 java -classpath lib/* ^
 	 -DmqttUrl=%mqttUrl% ^
