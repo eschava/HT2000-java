@@ -120,7 +120,7 @@ public class HT2000Window extends JDialog implements ActionListener {
         if (connection != null) {
             timer.stop();
             connection.close();
-            connection.shutdown();
+            HT2000UsbConnection.shutdown();
         }
     }
 }

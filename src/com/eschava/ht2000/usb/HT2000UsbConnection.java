@@ -13,24 +13,36 @@ public class HT2000UsbConnection {
     public static final short USB_VENDOR_ID = 0x10c4;
     public static final short USB_PRODUCT_ID = (short) 0x82cd;
 
-    private final Context context;
+    private final static Context context;
+    private final static UsbException contextException;
+    static
+    {
+        context = new Context();
+        int result = LibUsb.init(context);
+        contextException = result != LibUsb.SUCCESS
+                ? new UsbException("Unable to initialize libusb.", result)
+                : null;
+    }
+
     private final Device device;
     private DeviceHandle handle;
 
     public HT2000UsbConnection() throws Exception {
-
-        context = new Context();
-        int result = LibUsb.init(context);
-        if (result != LibUsb.SUCCESS)
-            throw new UsbException("Unable to initialize libusb.", result);
+        if (contextException != null)
+            throw contextException;
 
         DeviceList list = new DeviceList();
-        result = LibUsb.getDeviceList(null, list);
+        int result = LibUsb.getDeviceList(null, list);
         if (result < 0) throw new UsbException("Unable to get device list", result);
 
         device = findDevice(list);
         if (device == null)
             throw new Exception("HT2000 is not found among connected devices");
+    }
+
+    public static void shutdown() {
+        if (contextException == null)
+            LibUsb.exit(context);
     }
 
     private Device findDevice(DeviceList list) throws UsbException {
@@ -64,10 +76,6 @@ public class HT2000UsbConnection {
         if (handle != null && handle.getPointer() != 0)
             LibUsb.close(handle);
         handle = null;
-    }
-
-    public void shutdown() {
-        LibUsb.exit(context);
     }
 
     public HT2000State readState() throws UsbException {
