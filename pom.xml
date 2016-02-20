@@ -5,11 +5,33 @@
     <artifactId>ht2000</artifactId>
     <version>0.1-SNAPSHOT</version>
 
-    <dependencies>
-        <dependency>
-        	<groupId>org.usb4java</groupId>
-        	<artifactId>usb4java</artifactId>
-        	<version>1.2.0</version>
-        </dependency>
-    </dependencies>
+	<build>
+        <sourceDirectory>src</sourceDirectory>
+        <finalName>../release/lib/ht2000</finalName>
+
+        <plugins>
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>install</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>release/lib</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.usb4java</groupId>
+			<artifactId>usb4java</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+	</dependencies>
 </project>
