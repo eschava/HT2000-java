@@ -40,6 +40,10 @@ public class MqttMain extends Thread {
         return String.valueOf(v).getBytes();
     }
 
+    private static byte[] getPayload(int v) {
+        return String.valueOf(v).getBytes();
+    }
+
     public static void main(String[] args) throws Exception {
         new MqttMain().start();
     }

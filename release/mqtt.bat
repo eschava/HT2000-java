@@ -11,7 +11,7 @@ SET co2Topic=/ht-2000/co2
 
 SET interval=60
 
-java -classpath lib/* ^
+java -classpath "lib/*" ^
 	 -DmqttUrl=%mqttUrl% ^
 	 -DmqttClientId=%mqttClientId% ^
 	 -DmqttUser=%mqttUser% ^
