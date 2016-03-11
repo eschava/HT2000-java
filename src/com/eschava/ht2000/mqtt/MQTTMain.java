@@ -45,7 +45,12 @@ public class MqttMain extends Thread {
     }
 
     public static void main(String[] args) throws Exception {
-        new MqttMain().start();
+        try {
+            new MqttMain().start();
+        } catch (Exception e) {
+            HT2000UsbConnection.shutdown();
+            throw e;
+        }
     }
 
     @Override
