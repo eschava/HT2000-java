@@ -75,8 +75,8 @@ public class HT2000UsbConnection {
             throw new UsbException("Unable to open USB device", result);
 
         // detach from kernel driver
-        detach = LibUsb.hasCapability(LibUsb.CAP_SUPPORTS_DETACH_KERNEL_DRIVER)
-            && LibUsb.kernelDriverActive(handle, INTERFACE_NUMBER) == 1;
+        // have to check LibUsb.hasCapability(LibUsb.CAP_SUPPORTS_DETACH_KERNEL_DRIVER) but it returns incorrect result for ARM
+        detach = LibUsb.kernelDriverActive(handle, INTERFACE_NUMBER) == 1;
         if (detach)
         {
             result = LibUsb.detachKernelDriver(handle, INTERFACE_NUMBER);
