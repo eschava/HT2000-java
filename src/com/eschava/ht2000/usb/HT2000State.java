@@ -10,6 +10,9 @@ import java.util.Date;
  * @author Eugene Schava
  */
 public class HT2000State {
+    private static final long TIMESTAMP_SHIFT = 0x77797DA0; // TODO: magic constant
+    private static final double TEMPERATURE_SHIFT = 11.2; // TODO: magic constant
+
     private final Date time;
     private final double temperature;
     private final double humidity;
@@ -18,8 +21,11 @@ public class HT2000State {
     public HT2000State(ByteBuffer buffer) {
         buffer.order(ByteOrder.BIG_ENDIAN); // to guarantee correct order
 
-        time = new Date(buffer.getInt(1) * 1000L);
-        temperature = 11.2 + (buffer.get(8) & 0xFF) / 10.0; // TODO: 11.2 magic constant
+        long timestamp = Integer.toUnsignedLong(buffer.getInt(1));
+        if (timestamp > TIMESTAMP_SHIFT)
+            timestamp -= TIMESTAMP_SHIFT;
+        time = new Date(timestamp * 1000);
+        temperature = TEMPERATURE_SHIFT + Byte.toUnsignedInt(buffer.get(8)) / 10.0;
         humidity = buffer.getShort(9) / 10.0;
         co2 = buffer.getShort(24);
     }

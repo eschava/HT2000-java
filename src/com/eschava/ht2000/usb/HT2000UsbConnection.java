@@ -13,6 +13,7 @@ public class HT2000UsbConnection {
     public static final short USB_VENDOR_ID = 0x10c4;
     public static final short USB_PRODUCT_ID = (short) 0x82cd;
     public static final int   INTERFACE_NUMBER = 0;
+    private static final boolean CLAIM_INTERFACE = Boolean.parseBoolean(System.getProperty("USB.ClaimInterface", "true"));
 
     private static final int LOG_LEVEL = Integer.getInteger("LibUsb.LOG_LEVEL", LibUsb.LOG_LEVEL_NONE);
 
@@ -30,7 +31,8 @@ public class HT2000UsbConnection {
 
     private final Device device;
     private DeviceHandle handle;
-    private boolean detach = false;
+    private boolean detached = false;
+    private boolean claimed = false;
 
     public HT2000UsbConnection() throws Exception {
         if (contextException != null)
@@ -76,29 +78,40 @@ public class HT2000UsbConnection {
 
         // detach from kernel driver
         // have to check LibUsb.hasCapability(LibUsb.CAP_SUPPORTS_DETACH_KERNEL_DRIVER) but it returns incorrect result for ARM
-        detach = LibUsb.kernelDriverActive(handle, INTERFACE_NUMBER) == 1;
+        boolean detach = LibUsb.kernelDriverActive(handle, INTERFACE_NUMBER) == 1;
         if (detach)
         {
             result = LibUsb.detachKernelDriver(handle, INTERFACE_NUMBER);
             if (result != LibUsb.SUCCESS)
                 throw new UsbException("Unable to detach kernel driver", result);
+            detached = true;
         }
 
         // claim
-        result = LibUsb.claimInterface(handle, INTERFACE_NUMBER);
-        if (result != LibUsb.SUCCESS)
-            throw new UsbException("Unable to claim interface", result);
+        if (CLAIM_INTERFACE) {
+            result = LibUsb.claimInterface(handle, INTERFACE_NUMBER);
+            if (result != LibUsb.SUCCESS)
+                throw new UsbException("Unable to claim interface", result);
+            claimed = true;
+        }
     }
 
     public void close() {
+        if (handle == null) // already closed
+            return;
+
+        int result;
+
         // release
-        int result = LibUsb.releaseInterface(handle, INTERFACE_NUMBER);
-        if (result != LibUsb.SUCCESS)
+        if (claimed) {
+            result = LibUsb.releaseInterface(handle, INTERFACE_NUMBER);
+            if (result != LibUsb.SUCCESS)
 //            throw new UsbException("Unable to release interface", result);
-            new UsbException("Unable to release interface", result).printStackTrace();
+                new UsbException("Unable to release interface", result).printStackTrace();
+        }
 
         // re-attach kernel driver if needed
-        if (detach)
+        if (detached)
         {
             result = LibUsb.attachKernelDriver(handle, INTERFACE_NUMBER);
             if (result != LibUsb.SUCCESS)

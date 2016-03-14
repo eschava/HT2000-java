@@ -86,6 +86,7 @@ public class HT2000Window extends JDialog implements ActionListener {
             timer.start();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
     }
 
