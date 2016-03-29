@@ -11,7 +11,7 @@ import java.util.Date;
  */
 public class HT2000State {
     private static final long TIMESTAMP_SHIFT = 0x77797DA0; // TODO: magic constant
-    private static final double TEMPERATURE_SHIFT = 11.2; // TODO: magic constant
+    private static final int TEMPERATURE_SHIFT = 112; // TODO: magic constant
 
     private final Date time;
     private final double temperature;
@@ -25,9 +25,17 @@ public class HT2000State {
         if (timestamp > TIMESTAMP_SHIFT)
             timestamp -= TIMESTAMP_SHIFT;
         time = new Date(timestamp * 1000);
-        temperature = TEMPERATURE_SHIFT + /*Byte.*/toUnsignedInt(buffer.get(8)) / 10.0;
+        temperature = (TEMPERATURE_SHIFT + /*Byte.*/toUnsignedInt(buffer.get(8))) / 10.0;
         humidity = buffer.getShort(9) / 10.0;
         co2 = buffer.getShort(24);
+    }
+
+    private static long toUnsignedLong(int x) {
+        return ((long) x) & 0xffffffffL;
+    }
+
+    private static int toUnsignedInt(byte x) {
+        return ((int) x) & 0xff;
     }
 
     public Date getTime() {
@@ -54,13 +62,5 @@ public class HT2000State {
                 ", Humidity=" + humidity +
                 ", CO2=" + co2 +
                 '}';
-    }
-
-    private static long toUnsignedLong(int x) {
-        return ((long) x) & 0xffffffffL;
-    }
-
-    private static int toUnsignedInt(byte x) {
-        return ((int) x) & 0xff;
     }
 }
